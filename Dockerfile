@@ -12,6 +12,9 @@ RUN set -x \
 
 # Get and build terraform-docs
 ARG VERSION=latest
+ARG GOOS=linux
+ARG GOARCH=amd64
+
 RUN set -x \
 	&& export GOPATH=/go \
 	&& mkdir -p /go/src/github.com/segmentio \
@@ -31,9 +34,9 @@ RUN set -x \
 		&& mv dist/terraform-docs_linux_amd64 /usr/local/bin/terraform-docs; \
 	# Build terraform-docs > 0.3.0
 	else \
-		make deps \
+		make vendor \
 		&& make test \
-		&& make build-linux-amd64 \
+		&& make build \
 		&& if [ "${VERSION}" = "0.4.0" ]; then \
 			mv bin/terraform-docs-v${VERSION}-linux-amd64 /usr/local/bin/terraform-docs; \
 		else \
@@ -47,7 +50,7 @@ RUN set -x \
 	&& if [ "${VERSION}" != "latest" ]; then \
 		terraform-docs --version | grep "${VERSION}"; \
 	else \
-		terraform-docs --version | grep -E "(terraform-docs[[:space:]])?(version[[:space:]])?dev"; \
+		terraform-docs --version | grep -E "terraform-docs\s+version\s+(.*?)\s"; \
 	fi
 
 
